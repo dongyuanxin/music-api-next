@@ -74,21 +74,28 @@ class Music {
           return resolve({
             success: false
           });
-        let data = JSON.parse(body);
-        resolve({
-          success: true,
-          results: data.data.songs.map(item => {
-            return {
-              id: item.song_id,
-              name: item.song_name,
-              artist: item.artist_name,
-              album: item.album_name,
-              cover: item.album_logo,
-              needPay: item.need_pay_flag === 1,
-              plus: { file: item.listen_file }
-            };
-          })
-        });
+        try {
+          let data = JSON.parse(body);
+          return resolve({
+            success: true,
+            results: data.data.songs.map(item => {
+              return {
+                id: item.song_id,
+                name: item.song_name,
+                artist: item.artist_name,
+                album: item.album_name,
+                cover: item.album_logo,
+                needPay: item.need_pay_flag === 1,
+                plus: { file: item.listen_file }
+              };
+            })
+          });
+        } catch (error) {
+          return resolve({
+            success: false,
+            msg: error.message
+          });
+        }
       });
     });
     return promise;
@@ -109,17 +116,24 @@ class Music {
           return resolve({
             success: false
           });
-        let data = JSON.parse(body);
-        let location = data.data.trackList[0].location;
-        resolve({
-          success: true,
-          results: {
-            url: this._handleProtocolRelativeUrl(this._caesar(location)),
-            lyric: this._handleProtocolRelativeUrl(
-              data.data.trackList[0].lyric_url
-            )
-          }
-        });
+        try {
+          let data = JSON.parse(body);
+          let location = data.data.trackList[0].location;
+          return resolve({
+            success: true,
+            results: {
+              url: this._handleProtocolRelativeUrl(this._caesar(location)),
+              lyric: this._handleProtocolRelativeUrl(
+                data.data.trackList[0].lyric_url
+              )
+            }
+          });
+        } catch (error) {
+          return resolve({
+            success: false,
+            msg: error.message
+          });
+        }
       });
     });
     return promise;
@@ -127,14 +141,14 @@ class Music {
 }
 
 let musicApi = new Music();
-musicApi.searchSong("thunder", 1, 10).then(res => {
+musicApi.searchSong("thunder", 1, 5).then(res => {
   let data = res.results;
   for (let item of data) {
     if (item.needPay) {
       continue; // need pay! But file is saved at 'plus'
     }
-    musicApi.getSong(item.id).then(_ => {
-      console.log({ ...item, ..._.results });
+    musicApi.getSong(item.id).then(res => {
+      console.log(res);
     });
   }
 });
