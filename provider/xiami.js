@@ -83,7 +83,9 @@ class Music {
               name: item.song_name,
               artist: item.artist_name,
               album: item.album_name,
-              cover: item.album_logo
+              cover: item.album_logo,
+              needPay: item.need_pay_flag === 1,
+              plus: { file: item.listen_file }
             };
           })
         });
@@ -125,9 +127,12 @@ class Music {
 }
 
 let musicApi = new Music();
-musicApi.searchSong("周杰伦", 1, 10).then(res => {
+musicApi.searchSong("thunder", 1, 10).then(res => {
   let data = res.results;
   for (let item of data) {
+    if (item.needPay) {
+      continue; // need pay! But file is saved at 'plus'
+    }
     musicApi.getSong(item.id).then(_ => {
       console.log({ ...item, ..._.results });
     });
