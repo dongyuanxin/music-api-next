@@ -51,7 +51,7 @@ class Music {
                 cover: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${
                   item.albummid
                 }.jpg`,
-                needPay: item.payalbumprice > 0
+                needPay: item.pay.payalbumprice > 0
               };
             })
           });
@@ -130,7 +130,7 @@ class Music {
 }
 
 let musicApi = new Music();
-musicApi.searchSong("渐渐", 1, 5).then(res => {
+musicApi.searchSong("让我留在你身边", 1, 10).then(res => {
   let data = res.results;
   for (let item of data) {
     if (item.needPay) {
