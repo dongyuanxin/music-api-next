@@ -21,7 +21,6 @@ class Music {
         n: limit,
         w: key
       });
-    console.log(url);
     let options = {
       url,
       method: "GET",
