@@ -1,95 +1,107 @@
-var xiami = (function() {
+var qq = (function() {
   "use strict";
-  function caesar(location) {
-    var num = location[0];
-    var avg_len = Math.floor(location.slice(1).length / num);
-    var remainder = location.slice(1).length % num;
 
-    var result = [];
-    for (var i = 0; i < remainder; i++) {
-      var line = location.slice(
-        i * (avg_len + 1) + 1,
-        (i + 1) * (avg_len + 1) + 1
-      );
-      result.push(line);
-    }
-
-    for (var i = 0; i < num - remainder; i++) {
-      var line = location
-        .slice((avg_len + 1) * remainder)
-        .slice(i * avg_len + 1, (i + 1) * avg_len + 1);
-      result.push(line);
-    }
-
-    var s = [];
-    for (var i = 0; i < avg_len; i++) {
-      for (var j = 0; j < num; j++) {
-        s.push(result[j][i]);
-      }
-    }
-
-    for (var i = 0; i < remainder; i++) {
-      s.push(result[i].slice(-1));
-    }
-
-    return unescape(s.join("")).replace(/\^/g, "0");
+  function htmlDecode(value) {
+    return $("<div/>")
+      .html(value)
+      .text();
   }
 
-  function handleProtocolRelativeUrl(url) {
-    var regex = /^.*?\/\//;
-    var result = url.replace(regex, "http://");
-    return result;
-  }
-
-  function xm_retina_url(s) {
-    if (s.slice(-6, -4) == "_1") {
-      return s.slice(0, -6) + s.slice(-4);
-    }
-    return s;
-  }
-
-  var xm_show_playlist = function(url, hm) {
-    var offset = getParameterByName("offset", url);
-    var page = offset / 30 + 1;
-
-    var target_url = "http://www.xiami.com/collect/recommend/page/" + page;
+  var qq_show_playlist = function(url, hm) {
+    var offset = Number(getParameterByName("offset", url)) || 0;
+    var target_url =
+      "https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg" +
+      "?rnd=0.4781484879517406&g_tk=732560869&jsonpCallback=MusicJsonCallback" +
+      "&loginUin=0&hostUin=0&format=jsonp&inCharset=utf8&outCharset=utf-8" +
+      "&notice=0&platform=yqq&needNewCode=0" +
+      "&categoryId=10000000&sortId=5&sin=" +
+      offset +
+      "&ein=" +
+      (49 + offset);
 
     return {
       success: function(fn) {
         var result = [];
-        hm.get(target_url).then(function(response) {
+        hm({
+          url: target_url,
+          method: "GET",
+          transformResponse: undefined
+        }).then(function(response) {
           var data = response.data;
-          data = $.parseHTML(data);
-          $(data)
-            .find(".block_list ul li")
-            .each(function() {
-              var default_playlist = {
-                cover_img_url: "",
-                title: "",
-                id: "",
-                source_url: ""
-              };
-              default_playlist.cover_img_url = handleProtocolRelativeUrl(
-                $(this).find("img")[0].src
-              );
-              default_playlist.title = $(this).find("h3 a")[0].title;
-              var xiami_url = $(this).find("h3 a")[0].href;
-              var list_id = xiami_url
-                .split("?")[0]
-                .split("/")
-                .pop();
-              default_playlist.id = "xmplaylist_" + list_id;
-              default_playlist.source_url =
-                "http://www.xiami.com/collect/" + list_id;
-              result.push(default_playlist);
-            });
-          return fn({ result: result });
+          data = data.slice("MusicJsonCallback(".length, -")".length);
+          data = JSON.parse(data);
+
+          var playlists = [];
+          $.each(data.data.list, function(index, item) {
+            var d = {
+              cover_img_url: item.imgurl,
+              title: htmlDecode(item.dissname),
+              id: "qqplaylist_" + item.dissid,
+              source_url: "http://y.qq.com/#type=taoge&id=" + item.dissid
+            };
+            playlists.push(d);
+          });
+
+          return fn({ result: playlists });
         });
       }
     };
   };
 
-  var xm_get_playlist = function(url, hm, se) {
+  function qq_get_image_url(qqimgid, img_type) {
+    if (qqimgid == null) {
+      return "";
+    }
+    var category = "";
+    if (img_type == "artist") {
+      category = "mid_singer_300";
+    }
+    if (img_type == "album") {
+      category = "mid_album_300";
+    }
+
+    var s = [
+      category,
+      qqimgid[qqimgid.length - 2],
+      qqimgid[qqimgid.length - 1],
+      qqimgid
+    ].join("/");
+    var url = "http://imgcache.qq.com/music/photo/" + s + ".jpg";
+    return url;
+  }
+
+  function qq_convert_song(song) {
+    var d = {
+      id: "qqtrack_" + song.songmid,
+      title: htmlDecode(song.songname),
+      artist: htmlDecode(song.singer[0].name),
+      artist_id: "qqartist_" + song.singer[0].mid,
+      album: htmlDecode(song.albumname),
+      album_id: "qqalbum_" + song.albummid,
+      img_url: qq_get_image_url(song.albummid, "album"),
+      source: "qq",
+      source_url:
+        "http://y.qq.com/#type=song&mid=" +
+        song.songmid +
+        "&tpl=yqq_song_detail",
+      url: "qqtrack_" + song.songmid,
+      disabled: !qq_is_playable(song)
+    };
+    return d;
+  }
+
+  function qq_is_playable(song) {
+    var switch_flag = song["switch"].toString(2).split("");
+    switch_flag.pop();
+    switch_flag.reverse();
+    // flag switch table meaning:
+    // ["play_lq", "play_hq", "play_sq", "down_lq", "down_hq", "down_sq", "soso", "fav", "share", "bgm", "ring", "sing", "radio", "try", "give"]
+    var play_flag = switch_flag[0];
+    var try_flag = switch_flag[13];
+    return play_flag == 1 || (play_flag == 1 && try_flag == 1);
+  }
+
+  var qq_get_playlist = function(url, hm, se) {
     var list_id = getParameterByName("list_id", url)
       .split("_")
       .pop();
@@ -97,28 +109,32 @@ var xiami = (function() {
     return {
       success: function(fn) {
         var target_url =
-          "http://api.xiami.com/web?v=2.0&app_key=1&id=" +
+          "http://i.y.qq.com/qzone-music/fcg-bin/fcg_ucc_getcdinfo_" +
+          "byids_cp.fcg?type=1&json=1&utf8=1&onlysong=0&jsonpCallback=" +
+          "jsonCallback&nosign=1&disstid=" +
           list_id +
-          "&callback=jsonp122&r=collect/detail";
+          "&g_tk=5381&loginUin=0&hostUin=0" +
+          "&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0" +
+          "&platform=yqq&jsonpCallback=jsonCallback&needNewCode=0";
         hm({
           url: target_url,
           method: "GET",
           transformResponse: undefined
         }).then(function(response) {
           var data = response.data;
-          data = data.slice("jsonp122(".length, -")".length);
+          data = data.slice("jsonCallback(".length, -")".length);
           data = JSON.parse(data);
 
           var info = {
-            cover_img_url: data.data.logo,
-            title: data.data.collect_name,
-            id: "xmplaylist_" + list_id,
-            source_url: "http://www.xiami.com/collect/" + list_id
+            cover_img_url: data.cdlist[0].logo,
+            title: data.cdlist[0].dissname,
+            id: "qqplaylist_" + list_id,
+            source_url: "http://y.qq.com/#type=taoge&id=" + list_id
           };
 
           var tracks = [];
-          $.each(data.data.songs, function(index, item) {
-            var track = xm_convert_song(item, "artist_name");
+          $.each(data.cdlist[0].songlist, function(index, item) {
+            var track = qq_convert_song(item);
             tracks.push(track);
           });
           return fn({ tracks: tracks, info: info });
@@ -127,217 +143,228 @@ var xiami = (function() {
     };
   };
 
-  var xm_bootstrap_track = function(sound, track, success, failure, hm, se) {
-    var target_url =
-      "http://www.xiami.com/song/playlist/id/" +
-      track.id.slice("xmtrack_".length) +
-      "/object_name/default/object_id/0/cat/json";
-    hm.get(target_url).then(function(response) {
-      var data = response.data;
-      if (data.data.trackList == null) {
-        failure();
-        return;
+  var qq_album = function(url, hm) {
+    var album_id = getParameterByName("list_id", url)
+      .split("_")
+      .pop();
+
+    return {
+      success: function(fn) {
+        var target_url =
+          "http://i.y.qq.com/v8/fcg-bin/fcg_v8_album_info_cp.fcg" +
+          "?platform=h5page&albummid=" +
+          album_id +
+          "&g_tk=938407465" +
+          "&uin=0&format=jsonp&inCharset=utf-8&outCharset=utf-8" +
+          "&notice=0&platform=h5&needNewCode=1&_=1459961045571" +
+          "&jsonpCallback=asonglist1459961045566";
+        hm({
+          url: target_url,
+          method: "GET",
+          transformResponse: undefined
+        }).then(function(response) {
+          var data = response.data;
+          data = data.slice(" asonglist1459961045566(".length, -")".length);
+          data = JSON.parse(data);
+
+          var info = {
+            cover_img_url: qq_get_image_url(album_id, "album"),
+            title: data.data.name,
+            id: "qqalbum_" + album_id,
+            source_url: "http://y.qq.com/#type=album&mid=" + album_id
+          };
+
+          var tracks = [];
+          $.each(data.data.list, function(index, item) {
+            var track = qq_convert_song(item);
+            tracks.push(track);
+          });
+          return fn({ tracks: tracks, info: info });
+        });
       }
-      var location = data.data.trackList[0].location;
-      sound.url = handleProtocolRelativeUrl(caesar(location));
-      track.img_url = xm_retina_url(
-        handleProtocolRelativeUrl(data.data.trackList[0].pic)
-      );
-      track.album = data.data.trackList[0].album_name;
-      track.album_id = "xmalbum_" + data.data.trackList[0].album_id;
-      track.lyric_url = handleProtocolRelativeUrl(
-        data.data.trackList[0].lyric_url
-      );
-      success();
-    });
+    };
   };
 
-  function xm_convert_song(song_info, artist_field_name) {
-    var track = {
-      id: "xmtrack_" + song_info.song_id,
-      title: song_info.song_name,
-      artist: song_info[artist_field_name],
-      artist_id: "xmartist_" + song_info.artist_id,
-      album: song_info.album_name,
-      album_id: "xmalbum_" + song_info.album_id,
-      source: "xiami",
-      source_url: "http://www.xiami.com/song/" + song_info.song_id,
-      img_url: song_info.album_logo,
-      url: "xmtrack_" + song_info.song_id,
-      lyric_url: song_info.lyric_file
-    };
-    return track;
-  }
+  var qq_artist = function(url, hm) {
+    var artist_id = getParameterByName("list_id", url)
+      .split("_")
+      .pop();
 
-  var xm_search = function(url, hm, se) {
+    return {
+      success: function(fn) {
+        var target_url =
+          "http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg" +
+          "?platform=h5page&order=listen&begin=0&num=50&singermid=" +
+          artist_id +
+          "&g_tk=938407465&uin=0&format=jsonp&" +
+          "inCharset=utf-8&outCharset=utf-8&notice=0&platform=" +
+          "h5&needNewCode=1&from=h5&_=1459960621777&" +
+          "jsonpCallback=ssonglist1459960621772";
+        hm({
+          url: target_url,
+          method: "GET",
+          transformResponse: undefined
+        }).then(function(response) {
+          var data = response.data;
+          data = data.slice(" ssonglist1459960621772(".length, -")".length);
+          data = JSON.parse(data);
+
+          var info = {
+            cover_img_url: qq_get_image_url(artist_id, "artist"),
+            title: data.data.singer_name,
+            id: "qqartist_" + artist_id,
+            source_url: "http://y.qq.com/#type=singer&mid=" + artist_id
+          };
+
+          var tracks = [];
+          $.each(data.data.list, function(index, item) {
+            var track = qq_convert_song(item.musicData);
+            tracks.push(track);
+          });
+          return fn({ tracks: tracks, info: info });
+        });
+      }
+    };
+  };
+
+  var qq_search = function(url, hm, se) {
     return {
       success: function(fn) {
         var keyword = getParameterByName("keywords", url);
         var curpage = getParameterByName("curpage", url);
         var target_url =
-          "http://api.xiami.com/web?v=2.0&app_key=1&key=" +
+          "http://i.y.qq.com/s.music/fcgi-bin/search_for_qq_cp?" +
+          "g_tk=938407465&uin=0&format=jsonp&inCharset=utf-8" +
+          "&outCharset=utf-8&notice=0&platform=h5&needNewCode=1" +
+          "&w=" +
           keyword +
-          "&page=" +
+          "&zhidaqu=1&catZhida=1" +
+          "&t=0&flag=1&ie=utf-8&sem=1&aggr=0&perpage=20&n=20&p=" +
           curpage +
-          "&limit=20&callback=jsonp154&r=search/songs";
+          "&remoteplace=txt.mqq.all&_=1459991037831&jsonpCallback=jsonp4";
         hm({
           url: target_url,
           method: "GET",
           transformResponse: undefined
         }).then(function(response) {
           var data = response.data;
-          data = data.slice("jsonp154(".length, -")".length);
+          data = data.slice("jsonp4(".length, -")".length);
           data = JSON.parse(data);
           var tracks = [];
-          $.each(data.data.songs, function(index, item) {
-            var track = xm_convert_song(item, "artist_name");
+          $.each(data.data.song.list, function(index, item) {
+            var track = qq_convert_song(item);
             tracks.push(track);
           });
-          return fn({ result: tracks, total: data.data.total });
+          return fn({ result: tracks, total: data.data.song.totalnum });
         });
       }
     };
   };
 
-  var xm_album = function(url, hm, se) {
-    return {
-      success: function(fn) {
-        var album_id = getParameterByName("list_id", url)
-          .split("_")
-          .pop();
-        var target_url =
-          "http://api.xiami.com/web?v=2.0&app_key=1&id=" +
-          album_id +
-          "&page=1&limit=20&callback=jsonp217&r=album/detail";
-        hm({
-          url: target_url,
-          method: "GET",
-          transformResponse: undefined
-        }).then(function(response) {
-          var data = response.data;
-          data = data.slice("jsonp217(".length, -")".length);
-          data = JSON.parse(data);
+  var qq_bootstrap_track = function(sound, track, success, failure, hm, se) {
+    var target_url =
+      "https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg" +
+      "?g_tk=195219765&jsonpCallback=MusicJsonCallback004680169373158849" +
+      "&loginUin=1297716249&hostUin=0&format=json&inCharset=utf8" +
+      "&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0" +
+      "&cid=205361747&callback=MusicJsonCallback004680169373158849" +
+      "&uin=1297716249&songmid=" +
+      track.id.slice("qqtrack_".length) +
+      "&filename=C400" +
+      track.id.slice("qqtrack_".length) +
+      ".m4a&guid=7332953645";
 
-          var info = {
-            cover_img_url: data.data.album_logo,
-            title: data.data.album_name,
-            id: "xmalbum_" + data.data.album_id,
-            source_url: "http://www.xiami.com/album/" + data.data.album_id
-          };
-
-          var tracks = [];
-          $.each(data.data.songs, function(index, item) {
-            var track = xm_convert_song(item, "singers");
-            tracks.push(track);
-          });
-          return fn({ tracks: tracks, info: info });
-        });
-      }
-    };
+    hm({
+      url: target_url,
+      method: "GET",
+      transformResponse: undefined
+    }).then(function(response) {
+      var data = response.data;
+      data = data.slice(data.indexOf("(") + 1, data.length - 1);
+      data = JSON.parse(data);
+      var token = data.data.items[0].vkey;
+      var url =
+        "http://dl.stream.qqmusic.qq.com/C400" +
+        track.id.slice("qqtrack_".length) +
+        ".m4a?vkey=" +
+        token +
+        "&uin=1297716249&fromtag=0&guid=7332953645";
+      sound.url = url;
+      success();
+    });
   };
 
-  var xm_artist = function(url, hm, se) {
-    return {
-      success: function(fn) {
-        var artist_id = getParameterByName("list_id", url)
-          .split("_")
-          .pop();
+  function str2ab(str) {
+    // string to array buffer.
+    var buf = new ArrayBuffer(str.length);
+    var bufView = new Uint8Array(buf);
+    for (var i = 0, strLen = str.length; i < strLen; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+  }
 
-        var target_url =
-          "http://api.xiami.com/web?v=2.0&app_key=1&id=" +
-          artist_id +
-          "&page=1&limit=20&_ksTS=1459931285956_216" +
-          "&callback=jsonp217&r=artist/detail";
-
-        hm({
-          url: target_url,
-          method: "GET",
-          transformResponse: undefined
-        }).then(function(response) {
-          var data = response.data;
-          data = data.slice("jsonp217(".length, -")".length);
-          data = JSON.parse(data);
-
-          var info = {
-            cover_img_url: xm_retina_url(data.data.logo),
-            title: data.data.artist_name,
-            id: "xmartist_" + artist_id,
-            source_url: "http://www.xiami.com/artist/" + artist_id
-          };
-
-          target_url =
-            "http://api.xiami.com/web?v=2.0&app_key=1&id=" +
-            artist_id +
-            "&page=1&limit=20&callback=jsonp217&r=artist/hot-songs";
-          hm({
-            url: target_url,
-            method: "GET",
-            transformResponse: undefined
-          }).then(function(response) {
-            var data = response.data;
-            data = data.slice("jsonp217(".length, -")".length);
-            data = JSON.parse(data);
-
-            var tracks = [];
-            $.each(data.data, function(index, item) {
-              var track = xm_convert_song(item, "singers");
-              track.artist_id = "xmartist_" + artist_id;
-              tracks.push(track);
-            });
-            return fn({ tracks: tracks, info: info });
-          });
-        });
-      }
-    };
-  };
-
-  var xm_lyric = function(url, hm, se) {
+  var qq_lyric = function(url, hm, se) {
     var track_id = getParameterByName("track_id", url)
       .split("_")
       .pop();
-    var lyric_url = getParameterByName("lyric_url", url);
+    // use chrome extension to modify referer.
+    var target_url =
+      "http://i.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg?" +
+      "songmid=" +
+      track_id +
+      "&loginUin=0&hostUin=0&format=jsonp&inCharset=GB2312" +
+      "&outCharset=utf-8&notice=0&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0";
     return {
       success: function(fn) {
         hm({
-          url: lyric_url,
+          url: target_url,
           method: "GET",
           transformResponse: undefined
         }).then(function(response) {
           var data = response.data;
-          return fn({ lyric: data });
+          data = data.slice("MusicJsonCallback(".length, -")".length);
+          data = JSON.parse(data);
+          var lrc = "";
+          if (data.lyric != null) {
+            var td = new TextDecoder("utf8");
+            lrc = td.decode(str2ab(atob(data.lyric)));
+          }
+          return fn({ lyric: lrc });
         });
       }
     };
   };
 
-  var xm_parse_url = function(url) {
+  var qq_parse_url = function(url) {
     var result = undefined;
-    var match = /\/\/www.xiami.com\/collect\/([0-9]+)/.exec(url);
+    var match = /\/\/y.qq.com\/n\/yqq\/playlist\/([0-9]+)/.exec(url);
     if (match != null) {
       var playlist_id = match[1];
-      result = { type: "playlist", id: "xmplaylist_" + playlist_id };
+      result = { type: "playlist", id: "qqplaylist_" + playlist_id };
     }
     return result;
   };
 
   var get_playlist = function(url, hm, se) {
     var list_id = getParameterByName("list_id", url).split("_")[0];
-    if (list_id == "xmplaylist") {
-      return xm_get_playlist(url, hm, se);
+    if (list_id == "qqplaylist") {
+      return qq_get_playlist(url, hm, se);
     }
-    if (list_id == "xmalbum") {
-      return xm_album(url, hm, se);
+    if (list_id == "qqalbum") {
+      return qq_album(url, hm, se);
     }
-    if (list_id == "xmartist") {
-      return xm_artist(url, hm, se);
+    if (list_id == "qqartist") {
+      return qq_artist(url, hm, se);
     }
   };
+
   return {
-    show_playlist: xm_show_playlist,
+    show_playlist: qq_show_playlist,
     get_playlist: get_playlist,
-    parse_url: xm_parse_url,
-    bootstrap_track: xm_bootstrap_track,
-    search: xm_search,
-    lyric: xm_lyric
+    parse_url: qq_parse_url,
+    bootstrap_track: qq_bootstrap_track,
+    search: qq_search,
+    lyric: qq_lyric
   };
 })();

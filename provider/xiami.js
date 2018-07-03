@@ -1,77 +1,135 @@
-// const request = require("request");
-// function caesar(location) {
-//   var num = location[0];
-//   var avg_len = Math.floor(location.slice(1).length / num);
-//   var remainder = location.slice(1).length % num;
+const request = require("request");
+const querystring = require("querystring");
 
-//   var result = [];
-//   for (var i = 0; i < remainder; i++) {
-//     var line = location.slice(
-//       i * (avg_len + 1) + 1,
-//       (i + 1) * (avg_len + 1) + 1
-//     );
-//     result.push(line);
-//   }
+class Music {
+  constructor() {}
+  _caesar(location) {
+    var num = location[0];
+    var avg_len = Math.floor(location.slice(1).length / num);
+    var remainder = location.slice(1).length % num;
 
-//   for (var i = 0; i < num - remainder; i++) {
-//     var line = location
-//       .slice((avg_len + 1) * remainder)
-//       .slice(i * avg_len + 1, (i + 1) * avg_len + 1);
-//     result.push(line);
-//   }
+    var result = [];
+    for (var i = 0; i < remainder; i++) {
+      var line = location.slice(
+        i * (avg_len + 1) + 1,
+        (i + 1) * (avg_len + 1) + 1
+      );
+      result.push(line);
+    }
 
-//   var s = [];
-//   for (var i = 0; i < avg_len; i++) {
-//     for (var j = 0; j < num; j++) {
-//       s.push(result[j][i]);
-//     }
-//   }
+    for (var i = 0; i < num - remainder; i++) {
+      var line = location
+        .slice((avg_len + 1) * remainder)
+        .slice(i * avg_len + 1, (i + 1) * avg_len + 1);
+      result.push(line);
+    }
 
-//   for (var i = 0; i < remainder; i++) {
-//     s.push(result[i].slice(-1));
-//   }
+    var s = [];
+    for (var i = 0; i < avg_len; i++) {
+      for (var j = 0; j < num; j++) {
+        s.push(result[j][i]);
+      }
+    }
 
-//   return unescape(s.join("")).replace(/\^/g, "0");
-// }
+    for (var i = 0; i < remainder; i++) {
+      s.push(result[i].slice(-1));
+    }
 
-// function handleProtocolRelativeUrl(url) {
-//   var regex = /^.*?\/\//;
-//   var result = url.replace(regex, "http://");
-//   return result;
-// }
+    return unescape(s.join("")).replace(/\^/g, "0");
+  }
+  _handleProtocolRelativeUrl(url) {
+    let regex = /^.*?\/\//;
+    let result = url.replace(regex, "http://");
+    return result;
+  }
+  _xmRetinaUrl(s) {
+    if (s.slice(-6, -4) == "_1") {
+      return s.slice(0, -6) + s.slice(-4);
+    }
+    return s;
+  }
+  searchSong(key, page, limit) {
+    let url =
+      "http://api.xiami.com/web?" +
+      querystring.stringify({
+        v: "2.0",
+        key,
+        limit,
+        page,
+        r: "search/songs",
+        app_key: 1
+      });
+    let options = {
+      url,
+      method: "POST",
+      headers: {
+        referer: "http://h.xiami.com/", // must options
+        user_agent:
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36"
+      }
+    };
+    let promise = new Promise(resolve => {
+      request(options, (err, res, body) => {
+        if (err)
+          return resolve({
+            success: false
+          });
+        let data = JSON.parse(body);
+        resolve({
+          success: true,
+          results: data.data.songs.map(item => {
+            return {
+              id: item.song_id,
+              name: item.song_name,
+              artist: item.artist_name,
+              album: item.album_name,
+              cover: item.album_logo
+            };
+          })
+        });
+      });
+    });
+    return promise;
+  }
+  getSong(id) {
+    let url = `http://www.xiami.com/song/playlist/id/${id}/object_name/default/object_id/0/cat/json`;
+    let options = {
+      url,
+      method: "GET",
+      headers: {
+        user_agent:
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36"
+      }
+    };
+    let promise = new Promise(resolve => {
+      request(options, (err, res, body) => {
+        if (err)
+          return resolve({
+            success: false
+          });
+        let data = JSON.parse(body);
+        let location = data.data.trackList[0].location;
+        resolve({
+          success: true,
+          results: {
+            url: this._handleProtocolRelativeUrl(this._caesar(location)),
+            lyric: this._handleProtocolRelativeUrl(
+              data.data.trackList[0].lyric_url
+            )
+          }
+        });
+      });
+    });
+    return promise;
+  }
+}
 
-// function xm_retina_url(s) {
-//   if (s.slice(-6, -4) == "_1") {
-//     return s.slice(0, -6) + s.slice(-4);
-//   }
-//   return s;
-// }
-
-// const getSong = () => {
-//   let id = "1776156051";
-//   let targetUrl =
-//     "http://www.xiami.com/song/playlist/id/" +
-//     id +
-//     "/object_name/default/object_id/0/cat/json";
-//   request(targetUrl, function(error, response, body) {
-//     let data = JSON.parse(body);
-//     var location = data.data.trackList[0].location;
-//     let sound = {},
-//       track = {};
-//     sound.url = handleProtocolRelativeUrl(caesar(location));
-//     track.img_url = xm_retina_url(
-//       handleProtocolRelativeUrl(data.data.trackList[0].pic)
-//     );
-//     track.album = data.data.trackList[0].album_name;
-//     track.album_id = "xmalbum_" + data.data.trackList[0].album_id;
-//     track.lyric_url = handleProtocolRelativeUrl(
-//       data.data.trackList[0].lyric_url
-//     );
-//     console.log(sound);
-//     console.log(track);
-//   });
-// };
-
-// getSong();
-const test = require("./test");
-console.log(test);
+let musicApi = new Music();
+musicApi.searchSong("周杰伦", 1, 10).then(res => {
+  let data = res.results;
+  for (let item of data) {
+    musicApi.getSong(item.id).then(_ => {
+      console.log({ ...item, ..._.results });
+    });
+  }
+});
