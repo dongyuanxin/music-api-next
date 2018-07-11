@@ -140,15 +140,17 @@ class Music {
   }
 }
 
-let musicApi = new Music();
-musicApi.searchSong("thunder", 1, 5).then(res => {
-  let data = res.results;
-  for (let item of data) {
-    if (item.needPay) {
-      continue; // need pay! But file is saved at 'plus'
-    }
-    musicApi.getSong(item.id).then(res => {
-      console.log(res);
-    });
-  }
-});
+// let musicApi = new Music();
+// musicApi.searchSong("thunder", 1, 5).then(res => {
+//   let data = res.results;
+//   for (let item of data) {
+//     if (item.needPay) {
+//       continue; // need pay! But file is saved at 'plus'
+//     }
+//     musicApi.getSong(item.id).then(res => {
+//       console.log(res);
+//     });
+//   }
+// });
+
+module.exports = Music;

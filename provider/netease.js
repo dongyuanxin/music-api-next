@@ -103,15 +103,17 @@ class Music {
   }
 }
 
-let musicApi = new Music();
-musicApi.searchSong("林俊杰", 1, 5).then(res => {
-  let data = res.results;
-  for (let item of data) {
-    if (item.needPay) {
-      continue; // need pay! But file is saved at 'plus'
-    }
-    musicApi.getSong(item.id).then(res => {
-      console.log({ ...item, ...res.results });
-    });
-  }
-});
+// let musicApi = new Music();
+// musicApi.searchSong("林俊杰", 1, 5).then(res => {
+//   let data = res.results;
+//   for (let item of data) {
+//     if (item.needPay) {
+//       continue; // need pay! But file is saved at 'plus'
+//     }
+//     musicApi.getSong(item.id).then(res => {
+//       console.log({ ...item, ...res.results });
+//     });
+//   }
+// });
+
+module.exports = Music;
