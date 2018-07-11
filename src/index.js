@@ -33,27 +33,7 @@ const getSong = async options => {
   return await api[vendor].getSong(id);
 };
 
-async function test() {
-  let res = await searchSong({
-    vendor: "qq",
-    key: "周杰伦"
-  });
-  if (res.success === false) return;
-  let data = res.results;
-  for (let music of data) {
-    if (music.needPay) {
-      continue;
-    }
-    let info = await getSong({
-      id: music.id,
-      vendor: "qq"
-    });
-    console.log({ ...music, ...info.results });
-  }
-}
-
-test();
-// module.exports = {
-//   searchSong,
-//   getSong
-// };
+module.exports = {
+  searchSong,
+  getSong
+};
