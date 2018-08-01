@@ -33,7 +33,16 @@ const getSong = async options => {
   return await api[vendor].getSong(id);
 };
 
+const getComment = async options => {
+  let { vendor, id, page, limit } = options;
+  if (isUnvalidVendor(vendor) || id === undefined) {
+    return { success: false, msg: "Missing parameter" };
+  }
+  return await api[vendor].getComment(id, page, limit);
+};
+
 module.exports = {
   searchSong,
-  getSong
+  getSong,
+  getComment
 };

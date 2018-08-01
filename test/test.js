@@ -3,9 +3,9 @@ const musicApi = require("./../src/index");
 !(async function() {
   let res = await musicApi.searchSong({
     vendor: "netease",
-    key: "周杰伦"
-    // page: 2,
-    // limit: 3
+    key: "林俊杰",
+    page: 1,
+    limit: 1
   });
   if (res.success === false) return;
   let data = res.results;
@@ -14,10 +14,17 @@ const musicApi = require("./../src/index");
       console.log(music);
       continue;
     }
-    let info = await musicApi.getSong({
+    // let info = await musicApi.getSong({
+    //   id: music.id,
+    //   vendor: "netease"
+    // });
+    // console.log({ ...music, ...info.results });
+    console.log(music.id);
+    let info = await musicApi.getComment({
       id: music.id,
-      vendor: "qq"
+      vendor: "netease",
+      page: 1,
+      limit: 1
     });
-    console.log({ ...music, ...info.results });
   }
 })();

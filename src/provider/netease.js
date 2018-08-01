@@ -101,6 +101,46 @@ class Music {
 
     return promise;
   }
+  getComment(id, page, limit) {
+    let url = "https://music.163.com/weapi/v1/resource/comments/R_SO_4_" + id;
+    let form = {
+      rid: "R_SO_4_" + id,
+      offset: limit * (page - 1),
+      total: true,
+      limit,
+      csrf_token: ""
+    };
+    let { encText, encSecKey } = asrsea(
+      JSON.stringify(form),
+      this.e,
+      this.f,
+      this.g
+    );
+    let options = {
+      url,
+      method: "POST",
+      form: { params: encText, encSecKey: encSecKey },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    };
+    let promise = new Promise(resolve => {
+      request(options, (err, res, body) => {
+        if (err) {
+          return resolve({ success: false, msg: err.message });
+        }
+        try {
+          let data = JSON.parse(body);
+          console.log(data.comments);
+          resolve();
+          // data = data.data[0];
+          // return resolve({ success: true, results: { url: data.url } });
+        } catch (error) {
+          resolve();
+          // return resolve({ success: false, msg: error.message });
+        }
+      });
+    });
+    return promise;
+  }
 }
 
 module.exports = Music;
