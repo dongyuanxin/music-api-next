@@ -5,3 +5,4 @@ node_modules/
 *.ntvs*
 *.njsproj
 *.sln
+dist

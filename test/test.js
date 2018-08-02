@@ -1,4 +1,6 @@
-const musicApi = require("./../src/index");
+// const musicApi = require("./../src/index");
+var musicApi = require("./../dist/music-api");
+console.log(musicApi.searchSong);
 
 !(async function() {
   let res = await musicApi.searchSong({
