@@ -127,6 +127,124 @@ class Music {
     });
     return promise;
   }
+  __getTopId(id) {
+    let jsonpCallback = "getOneSongInfoCallback";
+    let url =
+      "https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?" +
+      querystring.stringify({
+        songmid: id,
+        tpl: "yqq_song_detail",
+        loginUin: 0,
+        hostUin: 0,
+        format: "jsonp",
+        callback: jsonpCallback,
+        jsonpCallback,
+        inCharset: "utf8",
+        outCharset: "utf-8",
+        notice: 0,
+        platform: "yqq",
+        needNewCode: 0
+      });
+    let options = {
+      url,
+      method: "GET",
+      headers: {
+        referer: "https://y.qq.com/n/yqq/song/" + id + ".html",
+        "user-agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
+      }
+    };
+    let promise = new Promise(resolve => {
+      request(options, (err, res, body) => {
+        if (err) {
+          return resolve({ success: false, msg: err.message });
+        }
+        try {
+          let data = body.substr(jsonpCallback.length + 1);
+          data = data.substr(0, data.length - 1);
+          data = JSON.parse(data);
+          let topId = data.data[0].id;
+          if (topId === null || topId === undefined) {
+            return resolve({ success: false, msg: "Not found" });
+          } else {
+            return resolve({ success: true, results: topId });
+          }
+        } catch (error) {
+          return resolve({ success: false, msg: error.message });
+        }
+      });
+    });
+    return promise;
+  }
+  async getComment(id, page, limit) {
+    let results = await this.__getTopId(id);
+    let promise = new Promise(resolve => {
+      if (results.success === false) {
+        return resolve(results);
+      }
+      let topId = results.results;
+      let jsonpCallback = "jsoncallback21880487934016424";
+      let url =
+        "https://c.y.qq.com/base/fcgi-bin/fcg_global_comment_h5.fcg?" +
+        querystring.stringify({
+          g_tk: 5381,
+          jsonpCallback,
+
+          loginUin: 0,
+          hostUin: 0,
+          format: "jsonp",
+          inCharset: "utf8",
+          outCharset: "GB2312",
+          notice: 0,
+          platform: "yqq",
+          needNewCode: 0,
+          cid: 205360772,
+          reqtype: 2,
+          biztype: 1,
+          topid: topId,
+          cmd: 8,
+          needmusiccrit: 0,
+          pagenum: page - 1, // 注意这里page从0开始计算
+          pagesize: limit,
+          lasthotcommentid: "",
+          callback: jsonpCallback,
+          domain: "qq.com",
+          ct: 24,
+          cv: 101010
+        });
+      let options = {
+        url,
+        method: "GET",
+        headers: {
+          referer: "https://y.qq.com/n/yqq/song/" + id + ".html",
+          "user-agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
+        }
+      };
+      request(options, (err, res, body) => {
+        if (err) {
+          return resolve({ success: false, msg: err.message });
+        }
+        try {
+          let data = body.substr(jsonpCallback.length + 1);
+          data = data.substr(0, data.length - 3); // 最后有2个换行符和1个")"
+          data = JSON.parse(data);
+          return resolve({ success: true, results: data.comment.commentlist });
+        } catch (error) {
+          return resolve({ success: false, msg: error.message });
+        }
+      });
+    });
+    return promise;
+  }
 }
+
+let music = new Music();
+// music.searchSong("再见 你好").then(res => {
+//   console.log(res);
+// });
+music.getComment("003sNxeY0gs6oL", 4, 1).then(res => {
+  console.log(res);
+});
 
 module.exports = Music;
