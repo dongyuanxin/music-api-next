@@ -235,7 +235,7 @@ class Music {
             success: true,
             results: data.comment.commentlist.map(item => {
               return {
-                time: moment(item.time).format("YYYY-MM-DD H:mm:ss"),
+                time: moment(1e3 * item.time).format("YYYY-MM-DD H:mm:ss"),
                 content: item.rootcommentcontent,
                 user: { headImgUrl: item.avatarurl, nickname: item.nick }
               };
@@ -253,7 +253,7 @@ class Music {
 let music = new Music();
 music.searchSong("林俊杰", 1, 1).then(res => {
   let id = res.results[0].id;
-  music.getComment(id, 1, 20).then(res => {
+  music.getComment(id, 1, 25).then(res => {
     console.log(res.results);
   });
 });
