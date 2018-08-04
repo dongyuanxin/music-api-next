@@ -1,4 +1,6 @@
 const request = require("request");
+const moment = require("moment");
+
 const querystring = require("querystring");
 
 class Music {
@@ -229,7 +231,16 @@ class Music {
           let data = body.substr(jsonpCallback.length + 1);
           data = data.substr(0, data.length - 3); // 最后有2个换行符和1个")"
           data = JSON.parse(data);
-          return resolve({ success: true, results: data.comment.commentlist });
+          return resolve({
+            success: true,
+            results: data.comment.commentlist.map(item => {
+              return {
+                time: moment(item.time).format("YYYY-MM-DD H:mm:ss"),
+                content: item.rootcommentcontent,
+                user: { headImgUrl: item.avatarurl, nickname: item.nick }
+              };
+            })
+          });
         } catch (error) {
           return resolve({ success: false, msg: error.message });
         }
@@ -240,11 +251,11 @@ class Music {
 }
 
 let music = new Music();
-// music.searchSong("再见 你好").then(res => {
-//   console.log(res);
-// });
-music.getComment("003sNxeY0gs6oL", 4, 1).then(res => {
-  console.log(res);
+music.searchSong("林俊杰", 1, 1).then(res => {
+  let id = res.results[0].id;
+  music.getComment(id, 1, 20).then(res => {
+    console.log(res.results);
+  });
 });
 
 module.exports = Music;
