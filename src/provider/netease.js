@@ -1,4 +1,6 @@
 const request = require("request");
+const moment = require("moment");
+
 const querystring = require("querystring");
 const { asrsea } = require("./../vendor/crypto");
 
@@ -129,18 +131,34 @@ class Music {
         }
         try {
           let data = JSON.parse(body);
-          console.log(data.comments);
-          resolve();
-          // data = data.data[0];
-          // return resolve({ success: true, results: { url: data.url } });
+          resolve({
+            success: true,
+            results: data.comments.map(item => {
+              return {
+                time: moment(item.time).format("YYYY-MM-DD H:mm:ss"),
+                content: item.content,
+                user: {
+                  headImgUrl: item.user.avatarUrl,
+                  nickname: item.user.nickname
+                }
+              };
+            })
+          });
         } catch (error) {
-          resolve();
-          // return resolve({ success: false, msg: error.message });
+          resolve({ success: false, msg: error.message });
         }
       });
     });
     return promise;
   }
 }
+
+let music = new Music();
+music.searchSong("林俊杰", 1, 1).then(res => {
+  let id = res.results[0].id;
+  music.getComment(id, 1, 20).then(res => {
+    console.log(res.results);
+  });
+});
 
 module.exports = Music;
