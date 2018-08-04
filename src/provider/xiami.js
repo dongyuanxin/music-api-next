@@ -140,4 +140,19 @@ class Music {
   }
 }
 
+let url =
+  "https://www.xiami.com/commentlist/turnpage/id/1776156051/pagesize/2/page/5/ajax/2";
+
+let options = {
+  url,
+  method: "POST",
+  form: {
+    type: 4
+  }
+};
+
+request(options, (err, res, body) => {
+  console.log(body);
+});
+
 module.exports = Music;

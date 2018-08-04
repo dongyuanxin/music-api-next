@@ -18,9 +18,9 @@ module.exports = {
     publicPath: __dirname + "/dist/", // js引用路径或者CDN地址
     path: path.resolve(__dirname, "dist"), // 打包文件的输出目录
     filename: "music-api.js",
-    chunkFilename: "[name].chunk.js"
+    chunkFilename: "[name].chunk.js",
     // library: "musicApi",
-    // libraryTarget: "commonjs"
+    libraryTarget: "commonjs"
   },
   target: "node"
   // externals: nodeModules
