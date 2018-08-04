@@ -1,4 +1,6 @@
 const request = require("request");
+const cheerio = require("cheerio");
+
 const querystring = require("querystring");
 
 class Music {
@@ -138,21 +140,94 @@ class Music {
     });
     return promise;
   }
+  __getPageComment(id, page) {
+    let url = `https://www.xiami.com/commentlist/turnpage/id/${id}/page/${page}/ajax/1`;
+    let options = {
+      url,
+      method: "POST",
+      form: {
+        type: 4
+      },
+      headers: {
+        origin: "https://www.xiami.com",
+        referer: "https://www.xiami.com/song/" + id,
+        user_agent:
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36"
+      }
+    };
+
+    let promise = new Promise(resolve => {
+      request(options, (err, res, body) => {
+        if (err) return resolve({ success: false, msg: err.message });
+        try {
+          let $ = cheerio.load(body),
+            liArr = $("ul li"),
+            results = [];
+          for (let i = 0; i < liArr.length; ++i) {
+            let li = $(liArr[i]),
+              id = li.attr("id");
+            results.push({
+              time: li.find(".info span.time").text() + ":00",
+              content: li
+                .find("#brief_" + id)
+                .clone()
+                .children()
+                .remove()
+                .end()
+                .text()
+                .replace(/(\s*$)/g, ""),
+              user: {
+                headImgUrl: li.find("img").attr("src"),
+                nickname: li.find("img").attr("alt")
+              }
+            });
+          }
+          return resolve({ success: true, results });
+        } catch (error) {
+          return resolve({ success: false, msg: error.message });
+        }
+      });
+    });
+    return promise;
+  }
+  async getComment(id, page, limit) {
+    const pageSize = 10;
+
+    let startPage = parseInt(page * limit, 10) / pageSize,
+      endPage = parseInt((page + 1) * limit, 10) / pageSize,
+      offset = startPage * pageSize;
+
+    let left = page * limit - offset,
+      right = (page + 1) * limit - offset,
+      results = [];
+
+    let promise = new Promise(async resolve => {
+      for (let i = startPage; i <= endPage; i++) {
+        if (i === 0) {
+          continue;
+        }
+        let res = await this.__getPageComment(id, i);
+        if (res.success === false) {
+          return resolve(res);
+        }
+        results = results.concat(res.results);
+      }
+      return resolve({
+        success: true,
+        results: results.slice(left, right)
+      });
+    });
+
+    return promise;
+  }
 }
 
-let url =
-  "https://www.xiami.com/commentlist/turnpage/id/1776156051/pagesize/2/page/5/ajax/2";
-
-let options = {
-  url,
-  method: "POST",
-  form: {
-    type: 4
-  }
-};
-
-request(options, (err, res, body) => {
-  console.log(body);
+let music = new Music();
+music.searchSong("林俊杰", 1, 1).then(res => {
+  let id = res.results[0].id;
+  music.getComment(id, 1, 25).then(res => {
+    console.log(res.results);
+  });
 });
 
 module.exports = Music;
