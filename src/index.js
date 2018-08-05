@@ -38,6 +38,8 @@ const getComment = async options => {
   if (isUnvalidVendor(vendor) || id === undefined) {
     return { success: false, msg: "Missing parameter" };
   }
+  page = page === undefined ? 1 : page;
+  limit = limit === undefined ? 20 : limit;
   return await api[vendor].getComment(id, page, limit);
 };
 

@@ -28,13 +28,11 @@ class Music {
     let options = {
       url,
       method: "POST",
-      form: {
+      body: querystring.stringify({
         params: encText,
         encSecKey: encSecKey
-      },
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
+      }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
     };
     let promise = new Promise(resolve => {
       request(options, (err, res, body) => {
@@ -78,7 +76,7 @@ class Music {
     let options = {
       url,
       method: "POST",
-      form: { params: encText, encSecKey: encSecKey },
+      body: querystring.stringify({ params: encText, encSecKey: encSecKey }),
       headers: { "Content-Type": "application/x-www-form-urlencoded" }
     };
     let promise = new Promise(resolve => {
@@ -121,7 +119,7 @@ class Music {
     let options = {
       url,
       method: "POST",
-      form: { params: encText, encSecKey: encSecKey },
+      body: querystring.stringify({ params: encText, encSecKey: encSecKey }),
       headers: { "Content-Type": "application/x-www-form-urlencoded" }
     };
     let promise = new Promise(resolve => {
@@ -153,12 +151,12 @@ class Music {
   }
 }
 
-let music = new Music();
-music.searchSong("林俊杰", 1, 1).then(res => {
-  let id = res.results[0].id;
-  music.getComment(id, 1, 20).then(res => {
-    console.log(res.results);
-  });
-});
+// let music = new Music();
+// music.searchSong("林俊杰", 1, 1).then(res => {
+//   let id = res.results[0].id;
+//   music.getComment(id, 1, 20).then(res => {
+//     console.log(res.results);
+//   });
+// });
 
 module.exports = Music;

@@ -4,7 +4,7 @@ console.log(musicApi.searchSong);
 
 !(async function() {
   let res = await musicApi.searchSong({
-    vendor: "netease",
+    vendor: "xiami",
     key: "林俊杰",
     page: 1,
     limit: 1
@@ -24,9 +24,10 @@ console.log(musicApi.searchSong);
     console.log(music.id);
     let info = await musicApi.getComment({
       id: music.id,
-      vendor: "netease",
+      vendor: "xiami",
       page: 1,
       limit: 1
     });
+    console.log(info);
   }
 })();

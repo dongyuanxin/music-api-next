@@ -145,10 +145,9 @@ class Music {
     let options = {
       url,
       method: "POST",
-      form: {
-        type: 4
-      },
+      body: querystring.stringify({ type: "4" }),
       headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
         origin: "https://www.xiami.com",
         referer: "https://www.xiami.com/song/" + id,
         user_agent:
@@ -222,12 +221,12 @@ class Music {
   }
 }
 
-let music = new Music();
-music.searchSong("林俊杰", 1, 1).then(res => {
-  let id = res.results[0].id;
-  music.getComment(id, 1, 25).then(res => {
-    console.log(res.results);
-  });
-});
+// let music = new Music();
+// music.searchSong("林俊杰", 1, 1).then(res => {
+//   let id = res.results[0].id;
+//   music.getComment(id, 1, 25).then(res => {
+//     console.log(res.results);
+//   });
+// });
 
 module.exports = Music;
