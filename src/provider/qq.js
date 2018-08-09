@@ -178,6 +178,10 @@ class Music {
     });
     return promise;
   }
+  filterComment(comment) {
+    let rule = /(\[em\].*?\[\/em\])|\n|\\n/gm;
+    return comment.replace(rule, "");
+  }
   async getComment(id, page, limit) {
     let results = await this.__getTopId(id);
     let promise = new Promise(resolve => {
@@ -235,7 +239,7 @@ class Music {
             results: data.comment.commentlist.map(item => {
               return {
                 time: moment(1e3 * item.time).format("YYYY-MM-DD H:mm:ss"),
-                content: item.rootcommentcontent,
+                content: this.filterComment(item.rootcommentcontent),
                 user: { headImgUrl: item.avatarurl, nickname: item.nick }
               };
             })
@@ -256,5 +260,20 @@ class Music {
 //     console.log(res.results);
 //   });
 // });
+
+// let rule = /(\[em\].*?\[\/em\])|\n|\\n/gm;
+// let str =
+//   "[em]234234[/em]我爱你哦" +
+//   "\n" +
+//   "给个赞吧么么哒[em]abce[/em]" +
+//   "absce\\n" +
+//   "\n" +
+//   "fefe";
+
+// console.log(str.replace(rule, ""));
+
+// let rule2 = /\\n|\n/gm;
+// let str2 = "absce\\n" + "\n" + "fefe";
+// console.log(str2.replace(rule2, ""));
 
 module.exports = Music;

@@ -105,6 +105,10 @@ class Music {
 
     return promise;
   }
+  filterComment(comment) {
+    let rule = /(\[.*?\])|\n|\\n/gm;
+    return comment.replace(rule, "");
+  }
   getComment(id, page, limit) {
     let url = "https://music.163.com/weapi/v1/resource/comments/R_SO_4_" + id;
     let form = {
@@ -138,7 +142,7 @@ class Music {
             results: data.comments.map(item => {
               return {
                 time: moment(item.time).format("YYYY-MM-DD H:mm:ss"),
-                content: item.content,
+                content: this.filterComment(item.content),
                 user: {
                   headImgUrl: item.user.avatarUrl,
                   nickname: item.user.nickname
@@ -166,5 +170,16 @@ class Music {
 // music.getSong(521690235).then(res => {
 //   console.log(res);
 // });
+
+// let rule = /(\[.*?\])|\n|\\n/gm;
+// let str =
+//   "[em]234234[/em]我爱你哦" +
+//   "\n" +
+//   "给个赞吧么么哒[em]abce[/em]" +
+//   "absce\\n" +
+//   "\n" +
+//   "fefe";
+
+// console.log(str.replace(rule, ""));
 
 module.exports = Music;
