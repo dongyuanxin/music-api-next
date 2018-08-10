@@ -6,6 +6,10 @@
     "request": "^2.87.0"
   },
   "devDependencies": {
+    "koa": "^2.5.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "koa-xml-body": "^2.0.0",
     "webpack": "^4.16.3"
   }
 }

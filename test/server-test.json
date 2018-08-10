@@ -1,0 +1,20 @@
+{
+  "search/song": [
+    {
+      "key": "周杰伦",
+      "vendor": "qq",
+      "page": 1,
+      "limit": 20
+    },
+    { "key": "林俊杰", "vendor": "netease", "page": 1, "limit": 20 }
+  ],
+  "get/song": [{ "id": 108138, "vendor": "netease" }],
+  "get/comment": [
+    {
+      "id": 108138,
+      "vendor": "netease",
+      "page": 1,
+      "limit": 20
+    }
+  ]
+}
