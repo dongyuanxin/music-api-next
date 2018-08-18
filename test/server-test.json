@@ -1,5 +1,5 @@
 {
-  "search/song": [
+  "http://193.112.241.232:5050/search/song": [
     {
       "key": "周杰伦",
       "vendor": "qq",
@@ -8,8 +8,10 @@
     },
     { "key": "林俊杰", "vendor": "netease", "page": 1, "limit": 20 }
   ],
-  "get/song": [{ "id": 108138, "vendor": "netease" }],
-  "get/comment": [
+  "http://193.112.241.232:5050/get/song": [
+    { "id": 108138, "vendor": "netease" }
+  ],
+  "http://193.112.241.232:5050/get/comment": [
     {
       "id": 108138,
       "vendor": "netease",

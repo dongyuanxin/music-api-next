@@ -53,7 +53,7 @@ class Music {
                 cover: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${
                   item.albummid
                 }.jpg`,
-                needPay: item.pay.payalbumprice > 0
+                needPay: item.pay.payplay > 0
               };
             })
           });
@@ -254,7 +254,8 @@ class Music {
 }
 
 // let music = new Music();
-// music.searchSong("林俊杰", 1, 1).then(res => {
+// music.searchSong("No tears left to cry", 1, 5).then(res => {
+//   console.log(res);
 //   let id = res.results[0].id;
 //   music.getComment(id, 1, 25).then(res => {
 //     console.log(res.results);
