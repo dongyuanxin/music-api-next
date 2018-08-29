@@ -86,7 +86,7 @@ class Music {
                 name: item.song_name,
                 artist: item.artist_name,
                 album: item.album_name,
-                cover: item.album_logo,
+                cover: item.album_pic,
                 needPay: item.need_pay_flag === 1,
                 plus: { file: item.listen_file }
               };
@@ -131,7 +131,7 @@ class Music {
               name: data.data.trackList[0].name,
               album: data.data.trackList[0].album_name,
               artist: data.data.trackList[0].artist_name,
-              cover: data.data.trackList[0].album_logo
+              cover: data.data.trackList[0].album_pic
             }
           });
         } catch (error) {
@@ -225,7 +225,8 @@ class Music {
   }
 }
 
-// let music = new Music();
+let music = new Music();
+music.getSong(1776156051);
 // music.searchSong("林俊杰", 1, 1).then(res => {
 //   let id = res.results[0].id;
 //   music.getComment(id, 1, 25).then(res => {
