@@ -127,7 +127,11 @@ class Music {
               url: this._handleProtocolRelativeUrl(this._caesar(location)),
               lyric: this._handleProtocolRelativeUrl(
                 data.data.trackList[0].lyric_url
-              )
+              ),
+              name: data.data.trackList[0].name,
+              album: data.data.trackList[0].album_name,
+              artist: data.data.trackList[0].artist_name,
+              cover: data.data.trackList[0].album_logo
             }
           });
         } catch (error) {
