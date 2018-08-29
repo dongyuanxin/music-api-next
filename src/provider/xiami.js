@@ -225,8 +225,7 @@ class Music {
   }
 }
 
-let music = new Music();
-music.getSong(1776156051);
+// let music = new Music();
 // music.searchSong("林俊杰", 1, 1).then(res => {
 //   let id = res.results[0].id;
 //   music.getComment(id, 1, 25).then(res => {
