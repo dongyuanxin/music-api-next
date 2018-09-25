@@ -15,13 +15,11 @@ fs.readdirSync("node_modules")
 module.exports = {
   entry: "./src/index.js",
   output: {
-    publicPath: __dirname + "/dist/", // js引用路径或者CDN地址
-    path: path.resolve(__dirname, "dist"), // 打包文件的输出目录
+    publicPath: __dirname + "/dist/",
+    path: path.resolve(__dirname, "dist"),
     filename: "music-api.js",
     chunkFilename: "[name].chunk.js",
-    // library: "musicApi",
     libraryTarget: "commonjs"
   },
   target: "node"
-  // externals: nodeModules
 };
