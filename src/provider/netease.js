@@ -128,27 +128,4 @@ class Music {
   }
 }
 
-// let music = new Music();
-// music.searchSong("林俊杰", 1, 1).then(res => {
-//   let id = res.results[0].id;
-//   music.getComment(id, 1, 20).then(res => {
-//     console.log(res.results);
-//   });
-// });
-
-// music.getSong(521690235).then(res => {
-//   console.log(res);
-// });
-
-// let rule = /(\[.*?\])|\n|\\n/gm;
-// let str =
-//   "[em]234234[/em]我爱你哦" +
-//   "\n" +
-//   "给个赞吧么么哒[em]abce[/em]" +
-//   "absce\\n" +
-//   "\n" +
-//   "fefe";
-
-// console.log(str.replace(rule, ""));
-
 module.exports = Music;

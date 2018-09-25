@@ -253,28 +253,4 @@ class Music {
   }
 }
 
-// let music = new Music();
-// music.searchSong("No tears left to cry", 1, 5).then(res => {
-//   console.log(res);
-//   let id = res.results[0].id;
-//   music.getComment(id, 1, 25).then(res => {
-//     console.log(res.results);
-//   });
-// });
-
-// let rule = /(\[em\].*?\[\/em\])|\n|\\n/gm;
-// let str =
-//   "[em]234234[/em]我爱你哦" +
-//   "\n" +
-//   "给个赞吧么么哒[em]abce[/em]" +
-//   "absce\\n" +
-//   "\n" +
-//   "fefe";
-
-// console.log(str.replace(rule, ""));
-
-// let rule2 = /\\n|\n/gm;
-// let str2 = "absce\\n" + "\n" + "fefe";
-// console.log(str2.replace(rule2, ""));
-
 module.exports = Music;

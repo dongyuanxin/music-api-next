@@ -225,12 +225,4 @@ class Music {
   }
 }
 
-// let music = new Music();
-// music.searchSong("林俊杰", 1, 1).then(res => {
-//   let id = res.results[0].id;
-//   music.getComment(id, 1, 25).then(res => {
-//     console.log(res.results);
-//   });
-// });
-
 module.exports = Music;
