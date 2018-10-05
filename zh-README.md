@@ -1,31 +1,29 @@
-# music-api-next
+> 一个可以快速从 QQ 音乐、虾米音乐和网易音乐获得歌曲搜索结果、歌曲链接信息和歌曲评论的第三方库。
 
-> Music API for search results, songs, comments from QQ, Xiami and Netease.
-
-For more information on how to get started and how to use `music-api-next`, please see [author's blog](https://godbmw.com/) and comment there. For source files and issues, please visit [the github repo](https://github.com/dongyuanxin/music-api-next).
+如果想了解更多关于如何使用`music-api-next`的知识，请去[库的开发者的博客](https://godbmw.com/)进行交流。如果需要提出 issues，欢迎来[仓库地址](https://github.com/dongyuanxin/music-api-next)
 
 [**DOCS**](https://godbmw.com/passage/62)
 
 [**中文文档**](https://godbmw.com/passage/63)
 
-## Install
+## 安装
 
 ```
 npm install music-api-next --save
 ```
 
-If you are in China, please use:
+网速不好的中国用户，请使用`cnpm`安装：
 
 ```
 cnpm install music-api-next --save
 ```
 
-## Quick Start
+## 快速开始
 
 ```javascript
 const musicAPI = require("music-api-next");
 
-// Search API: search keywords on qq, xiami or netease
+// 搜索接口: 返回指定关键词的搜索信息
 musicAPI
   .searchSong({
     key: "周杰伦",
@@ -36,7 +34,7 @@ musicAPI
   .then(songs => console.log(songs))
   .catch(error => console.log(error.message));
 
-// Song API: get music meta including URL
+// 歌曲信息接口: 返回指定歌曲的信息
 musicAPI
   .getSong({
     id: "003OUlho2HcRHC",
@@ -45,7 +43,7 @@ musicAPI
   .then(meta => console.log(meta))
   .catch(error => console.log(error.message));
 
-// Comment API: get comments for the specified song
+// 评论接口: 返回指定歌曲的评论
 musicAPI
   .getComment({
     id: "003OUlho2HcRHC",
@@ -57,27 +55,27 @@ musicAPI
   .catch(error => console.log(error.message));
 ```
 
-## Run with a server
+## 本地服务器
 
 ```shell
 git clone git@github.com:dongyuanxin/music-api-next.git
 cd music-api-next
 npm install
-// run server on port: 5050
+// 启动服务器的监听端口: 5050
 node server.js
 ```
 
-You can see the results of music APIs by accessing the url.
+启动服务器后，你可以直接在浏览器中访问 url 来查看结果。
 
-For example:
+例如:
 
 - Search API: `http://localhost:5050/search/song?key=周杰伦&page=1&limit=10&vendor=qq`
 - Song API: `http://localhost:5050/get/song?id=003OUlho2HcRHC&vendor=qq`
 - Comment API: `http://localhost:5050/get/comment?id=003OUlho2HcRHC&page=1&limit=10&vendor=qq`
 
-## Run with webpack
+## 配合`webpack`
 
-First, package with webpack.
+首先，配合`webpack`进行打包。
 
 ```shell
 git clone git@github.com:dongyuanxin/music-api-next.git
@@ -88,7 +86,7 @@ npm install
 webpack
 ```
 
-Then, you can move `music-api-next.js` very conveniently and use it in the following ways:
+然后，你就可以直接移动打包好的`music-api-next.js`到工作目录。引用方法如下：
 
 ```javascript
 const musicAPI = require("./music-api-next");
@@ -129,15 +127,15 @@ const musicAPI = require("./music-api-next");
   }
   ```
 
-## Warning
+## 警告
 
-1. **It cannot be used for commercial purposes.**
-2. **It runs only on NodeJS instead of browser.**
-3. **Please use it politely and don't put too much pressure on music platforms.**
+1. **请不要用于商业用途**
+2. **目前版本只能运行于 NodeJS**
+3. **请友好地调用 API，不要对这些音乐平台造成过大压力**
 
-## Thanks
+## 致谢
 
-The code for this project refers to the following open source projects and has been fixed, improved and added on NodeJS.
+项目代码参考了以下 2 个开源项目。并且做了修复、改进和增加（在 NodeJS 中）。
 
-1. [listen1_chrome_extension](https://github.com/listen1/listen1_chrome_extension): Has received a lawyer's letter from Tencent. May stop maintenance at the end of the year 2018.
-2. [musicAPI](https://github.com/LIU9293/musicAPI): It has stopped maintenance one year ago. So its APIs are invalid.
+1. [listen1_chrome_extension](https://github.com/listen1/listen1_chrome_extension): 由于接收到了腾讯的律师函，可能会在 2018 年底停止维护。
+2. [musicAPI](https://github.com/LIU9293/musicAPI): 停止维护 1 年多了，很多 API 已经失效。
