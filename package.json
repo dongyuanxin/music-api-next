@@ -11,5 +11,33 @@
     "koa-router": "^7.4.0",
     "koa-xml-body": "^2.0.0",
     "webpack": "^4.16.3"
-  }
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "music-api-next",
+  "description": "Music API for search results, songs, comments from QQ, Xiami and Netease. ",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "Music",
+    "Xiami",
+    "Netease",
+    "QQ",
+    "API",
+    "Node"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dongyuanxin/music-api-next.git"
+  },
+  "author": "godbmw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dongyuanxin/music-api-next/issues"
+  },
+  "homepage": "https://github.com/dongyuanxin/music-api-next#readme"
 }

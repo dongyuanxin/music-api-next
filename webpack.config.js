@@ -17,7 +17,7 @@ module.exports = {
   output: {
     publicPath: __dirname + "/dist/",
     path: path.resolve(__dirname, "dist"),
-    filename: "music-api.js",
+    filename: "music-api-next.js",
     chunkFilename: "[name].chunk.js",
     libraryTarget: "commonjs"
   },
