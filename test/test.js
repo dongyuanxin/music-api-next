@@ -1,10 +1,10 @@
 // const musicApi = require("./../src/index");
-var musicApi = require("./../dist/music-api");
+var musicApi = require("./../dist/music-api-next");
 console.log(musicApi.searchSong);
 
 !(async function() {
   let res = await musicApi.searchSong({
-    vendor: "xiami",
+    vendor: "5sing",
     key: "林俊杰",
     page: 1,
     limit: 1
@@ -18,13 +18,13 @@ console.log(musicApi.searchSong);
     }
     // let info = await musicApi.getSong({
     //   id: music.id,
-    //   vendor: "netease"
+    //   vendor: "5sing"
     // });
     // console.log({ ...music, ...info.results });
     console.log(music.id);
     let info = await musicApi.getComment({
       id: music.id,
-      vendor: "xiami",
+      vendor: "5sing",
       page: 1,
       limit: 1
     });

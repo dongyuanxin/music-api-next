@@ -1,11 +1,13 @@
 const Netease = require("./provider/netease");
 const QQ = require("./provider/qq");
 const Xiami = require("./provider/xiami");
+const FiveSing = require("./provider/5sing");
 
 const api = {
   netease: new Netease(),
   qq: new QQ(),
-  xiami: new Xiami()
+  xiami: new Xiami(),
+  "5sing": new FiveSing()
 };
 
 const isEmptyStr = str => str === "" || str === undefined || str === null;
