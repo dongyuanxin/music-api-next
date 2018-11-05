@@ -41,7 +41,7 @@ class Music {
               return {
                 id: item.songId,
                 name: item.songName.replace(pattern, ""),
-                artist: item.singer,
+                artist: item.nickName,
                 album: item.typeName,
                 cover: null,
                 needPay: item.status === 1 ? false : true
@@ -60,14 +60,18 @@ class Music {
   }
   async searchSong(key, page, limit) {
     const pageSize = 10;
-
-    let startPage = parseInt(page * limit, 10) / pageSize,
-      endPage = parseInt((page + 1) * limit, 10) / pageSize,
-      offset = startPage * pageSize;
-
-    let left = page * limit - offset,
-      right = (page + 1) * limit - offset,
+    let startPage = -1,
+      endPage = -1,
       results = [];
+
+    if (limit <= pageSize) {
+      startPage = page;
+      endPage = page;
+    } else {
+      startPage = parseInt(((page - 1) * limit) / pageSize, 10) + 1;
+      endPage = startPage + parseInt(limit / pageSize, 10);
+    }
+
     let promise = new Promise(async resolve => {
       for (let i = startPage; i <= endPage; i++) {
         if (i === 0) {
@@ -82,7 +86,7 @@ class Music {
       }
       return resolve({
         success: true,
-        results: results.slice(left, right)
+        results: results.slice(0, limit)
       });
     });
 
