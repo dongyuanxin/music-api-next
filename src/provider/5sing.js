@@ -4,6 +4,7 @@ const moment = require("moment");
 const querystring = require("querystring");
 
 const pattern = /<\/?.+?\/?>/g;
+const pattern2 = /\[\/?.+?\/?\].+?\[\/?.+?\/?\]/g
 
 class Music {
   constructor() {}
@@ -96,15 +97,16 @@ class Music {
     let now = (new Date()).getTime(),
       jsoncallback = "";
     let options = {
-      url: `http://service.5sing.kugou.com/song/getsongurl?songid=${id}&from=web&version=6.6.72&_=${now}`
+      url: `http://service.5sing.kugou.com/song/getsongurl?songid=${id}&songtype=bz&from=web&version=6.6.72&_=${now}`
     };
-
+    // console.log(options)
     let promise = new Promise(resolve => {
       request(options, (err, res, body) => {
         if (err) {
           return resolve({ success: false, msg: err.message });
         }
         try {
+          // console.log("body is ", body)
           let data = body.substr(jsoncallback.length + 1);
           data = data.substr(0, data.length - 1);
           data = JSON.parse(data);
@@ -125,7 +127,7 @@ class Music {
     let promise = new Promise(resolve => {
       let now = (new Date()).getTime();
       let options = {
-        url: `http://service.5sing.kugou.com/yc/comments/list1?page=${page}&rootId=${id}&limit=${limit}&_=${now}`
+        url: `http://service.5sing.kugou.com/yc/comments/list1?page=${page}&rootId=${id}&initBound=1&limit=${limit}&_=${now}`
       }
       request(options, (err, res, body) => {
         if (err) {
@@ -138,7 +140,7 @@ class Music {
             results: data.data.comments.map(item => {
               return {
                 time: item.createTime + " 00:00:00",
-                content: item.content,
+                content: item.content.replace(pattern, "").replace(pattern2, ""),
                 user: {
                   headImgUrl: item.user.img,
                   nickname: item.user.nickname

@@ -25,11 +25,12 @@ console.log(musicApi.searchSong);
     // console.log({ ...music, ...info.results });
     // console.log(music.id);
     let info = await musicApi.getComment({
-      id: '2104925',
-      vendor: "5sing",
+      id: 2201577,
+      limit: 20,
       page: 1,
-      limit: 1
+      vendor: "5sing"
     });
-    console.log(info.results[0].user);
+    console.log(info)
+    // console.log(info.results[0].user);
   
 })();
