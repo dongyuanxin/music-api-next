@@ -21,5 +21,6 @@ module.exports = {
     chunkFilename: "[name].chunk.js",
     libraryTarget: "commonjs"
   },
-  target: "node"
+  target: "node",
+  mode: "production"
 };

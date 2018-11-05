@@ -89,27 +89,12 @@ class Music {
     return promise;
   }
   getSong(id) {
-    let jsoncallback = "jQuery17017026534691627648_1541229197305";
-    let url =
-      "http://service.5sing.kugou.com/song/getsongurl?" +
-      querystring.stringify({
-        songid: id,
-        songtype: "bz",
-        from: "web",
-        version: "6.6.72",
-        _: new Date().getTime(),
-        jsoncallback
-      });
+    let now = (new Date()).getTime(),
+      jsoncallback = "";
     let options = {
-      url,
-      method: "GET",
-      headers: {
-        Host: "service.5sing.kugou.com",
-        referer: "http://5sing.kugou.com/fm/m/",
-        "user-agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
-      }
+      url: `http://service.5sing.kugou.com/song/getsongurl?songid=${id}&from=web&version=6.6.72&_=${now}`
     };
+
     let promise = new Promise(resolve => {
       request(options, (err, res, body) => {
         if (err) {
@@ -134,34 +119,16 @@ class Music {
   }
   getComment(id, page, limit) {
     let promise = new Promise(resolve => {
-      let jsoncallback = "jQuery17046387318970918034_1541228819480";
-      let url =
-        "http://service.5sing.kugou.com/bz/comments/list1?" +
-        querystring.stringify({
-          jsoncallback,
-          page,
-          rootId: id,
-          initBound: 1,
-          limit,
-          _: new Date().getTime()
-        });
+      let now = (new Date()).getTime();
       let options = {
-        url,
-        method: "GET",
-        headers: {
-          referer: `http://5sing.kugou.com/bz/${id}.html`,
-          "user-agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
-        }
-      };
+        url: `http://service.5sing.kugou.com/yc/comments/list1?page=${page}&rootId=${id}&limit=${limit}&_=${now}`
+      }
       request(options, (err, res, body) => {
         if (err) {
           return resolve({ success: false, msg: err.message });
         }
         try {
-          let data = body.substr(jsoncallback.length + 1);
-          data = data.substr(0, data.length - 1);
-          data = JSON.parse(data);
+          let data = JSON.parse(body);
           return resolve({
             success: true,
             results: data.data.comments.map(item => {
