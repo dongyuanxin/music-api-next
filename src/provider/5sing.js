@@ -113,7 +113,7 @@ class Music {
           return resolve({
             success: true,
             results: {
-              url: data.data.hqurl
+              url: data.data.squrl || data.data.hqurl || data.data.lqurl 
             }
           });
         } catch (error) {
